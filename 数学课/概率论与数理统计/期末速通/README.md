@@ -1,5 +1,7 @@
 配套的速通教程视频:
 
+https://www.bilibili.com/video/BV1dh411A7zB/
+
 ---
 
 日常学习资源: 
