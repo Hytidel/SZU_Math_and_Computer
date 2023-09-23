@@ -2,15 +2,15 @@
 
 主要内容:
 
-* 1. 绪论: 集合、关系、递归定义与归纳证明、语言
+* 绪论: 集合、关系、递归定义与归纳证明、语言
 
-* 2. 文法: 文法的形式定义、文法的构造、文法的Chomsky体系
+* 文法: 文法的形式定义、文法的构造、文法的Chomsky体系
  
-* 3. DFA与NFA: DFA的形式定义、DFA的构造、FA的即时描述、NFA的形式定义、NFA与DFA的等价性
+* DFA与NFA: DFA的形式定义、DFA的构造、FA的即时描述、NFA的形式定义、NFA与DFA的等价性
  
-* 4. ε-NFA: ε-NFA的形式定义、NFA与ε-NFA的等价性、识别RL的FA的构造、FA的变形
+* ε-NFA: ε-NFA的形式定义、NFA与ε-NFA的等价性、识别RL的FA的构造、FA的变形
 
-* 5. RE: 正则表达式、RE与FA的等价性
+* RE: 正则表达式、RE与FA的等价性
 
-* 6. RL的性质: RL的封闭性、Myhill-Nerode定理、DFA的极小化、RL的判定性质
+* RL的性质: RL的封闭性、Myhill-Nerode定理、DFA的极小化、RL的判定性质
 
