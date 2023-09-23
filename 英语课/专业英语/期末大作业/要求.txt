@@ -1,0 +1,29 @@
+本次作业为期末大作业预提交，本次作业不计入期末综合成绩。希望有志于拿A+的同学提交，我将给本次提交作业的同学提供进一步改进期末大作业的建议。
+
+期末大作业要求：
+
+（1）请首先用附件论文（原文）内容作为底稿和模板，在此基础上结合该领域最近2年的新发展，更新该论文的内容，形成期末大作业。请直接打开“专用答题纸.doc”，我已经把pdf原文转化为word版本，放入专用答题纸中。在专用答题纸上直接修改即可。请记得在答题纸上写上你的学号，姓名等信息。
+
+（2）请删除原文至少5篇参考文献，并增补至少10篇参考文献(第一作者单位为发达国家单位或者国内985大学单位)。该增补的文献需2021年以来发表的论文。随着参考文献的删除和增补，原文内容也需要相应修改。
+
+（3）原文第三章无需修改，保持原来内容即可。
+
+（4）请用修订模式修改专用答题纸中论文，保留修订标记。并用word版本提交。文档命名"学号+姓名"
+
+（5）请参考“修订方式修改论文.png”，选择嵌入方式修订。
+
+
+删
+[6]	Cont, R. Empirical properties of asset returns: stylized facts and statistical issues. Quant. Finance 2001, 1, 223–236. 
+
+[8]	Anaghi, M.F.; Norouzi, Y. A model for stock price forecasting based on ARMA systems. In Proceedings of the 2012 2nd International Conference on Advances in Computational Tools for Engineering Applications (ACTEA), Beirut, Lebanon, 12–15 December 2012,.265– 268. 
+
+[10]	Groda, B.; Vrbka, J. Prediction of stock price developments using the Box–Jenkins method. In Proceedings of the Innovative Economic Symposium 2017: Strategic Partnership in International Trade, Ceské Budˇejovice, Czech Republic, 19 October 2017, 39, 01007. 
+
+[20]	Deng Y, Bao F, Kong Y, Ren Z, Dai Q. Deep Direct Reinforcement Learning for Financial Signal Representation and Trading. IEEE Trans Neural Netw Learn Syst. 2017 Mar;28(3):653-664. 
+
+[21]	Di Persio L, Honchar O. Artificial neural networks architectures for stock price prediction: Comparisons and applications. International journal of circuits, systems and signal processing, 2016, 10(2016): 403- 413. 
+
+[23]	Omer Berat Sezer, Murat Ozbayoglu, Erdogan Dogdu. A Deep Neural- Network Based Stock Trading System Based on Evolutionary Optimized Technical Analysis Parameters. Procedia Computer Science [J] Volume 114,2017, 473-480 
+
+
