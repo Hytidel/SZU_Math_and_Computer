@@ -1,0 +1,570 @@
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>.nodata  main {width:1000px;margin: auto;}</style></head><body class="nodata " style=""><div class="main_father clearfix d-flex justify-content-center " style="height:100%;"> <div class="container clearfix " id="mainBox"><main><div class="blog-content-box">
+<div class="article-header-box">
+<div class="article-header">
+<div class="article-title-box">
+<h1 class="title-article" id="articleContentId">计组复习（一）：乘法器，除法器与浮点加法器</h1>
+</div>
+
+</div>
+</div>
+<div id="blogHuaweiyunAdvert"></div>
+<article class="baidu_pl">
+<div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-044f2cf1dc.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-light" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p></p>
+<div class="toc">
+<h4>目录</h4>
+<ul><li><a href="#_2" rel="nofollow">前言</a></li><li><a href="#_6" rel="nofollow">乘法器</a></li><li><a href="#_52" rel="nofollow">优化乘法器</a></li><li><a href="#_83" rel="nofollow">除法器</a></li><li><a href="#_138" rel="nofollow">优化除法器</a></li><li><a href="#_185" rel="nofollow">浮点加法器（重要⚠）</a></li><li><ul><li><a href="#_203" rel="nofollow">对阶阶段</a></li><li><a href="#_215" rel="nofollow">加法阶段</a></li><li><a href="#_221" rel="nofollow">规格化阶段</a></li><li><a href="#_237" rel="nofollow">舍入阶段</a></li><li><a href="#_250" rel="nofollow">浮点加法小结</a></li></ul>
+</li></ul>
+</div>
+<p></p>
+<h2><a id="_2"></a>前言</h2>
+<p>zsbd Orz<br/> <img src="https://img-blog.csdnimg.cn/2021010720492188.png" width="300px"/></p>
+<h2><a id="_6"></a>乘法器</h2>
+<p>普通乘法器模拟竖式乘法的计算过程。</p>
+<p>每一行竖式都有如下操作：取 <strong>乘数（multiplier）</strong> 最低位，和 <strong>被乘数（multiplicand）</strong> 相乘。</p>
+<p>不断将被乘数左移，乘数右移，每一行的的竖式乘法结果进行累加：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109161803548.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<blockquote>
+<p>注：<br/> 其思想是二进制拆分，比如计算：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"> 
+       
+        
+         
+         
+           6 
+          
+         
+           ∗ 
+          
+         
+           5 
+          
+         
+           = 
+          
+         
+           30 
+          
+         
+        
+          6*5=30 
+         
+        
+      </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">6</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">5</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">3</span><span class="mord">0</span></span></span></span></span></span></p>
+<p>那么 6 可以被二进制分解为 4 + 2，即</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"> 
+       
+        
+         
+         
+           30 
+          
+         
+           = 
+          
+         
+           4 
+          
+         
+           ∗ 
+          
+         
+           5 
+          
+         
+           + 
+          
+         
+           2 
+          
+         
+           ∗ 
+          
+         
+           5 
+          
+         
+           = 
+          
+          
+          
+            2 
+           
+          
+            2 
+           
+          
+         
+           ∗ 
+          
+         
+           5 
+          
+         
+           + 
+          
+          
+          
+            2 
+           
+          
+            1 
+           
+          
+         
+           ∗ 
+          
+         
+           5 
+          
+         
+        
+          30 = 4*5+2*5=2^2*5+2^1*5 
+         
+        
+      </span><span class="katex-html"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">3</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">4</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">5</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">5</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.864108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">5</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.864108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">5</span></span></span></span></span></span></p>
+</blockquote>
+<p>所以最终的 <strong>结果（product）</strong> 可以表示为 <strong>被乘数（multiplicand）</strong> 的移位的累加和。</p>
+<p>乘法器的硬件结构如下。因为 <strong>被乘数（multiplicand）</strong> 不断被移位，32 bit 的乘法器需要 64 bit 的 ALU 进行加法运算。</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109163844162.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>普通乘法器工作流程直接模拟竖式乘法即可：</p>
+<ol><li>判断 multiplier 末位是否为 1</li><li>product += multiplicand 或者不操作（对应 1，0）</li><li>multiplier 右移</li><li>multiplicand 左移</li><li>重复 1 直到 multiplier 移完为止</li></ol>
+<hr/>
+<p>该乘法器的工作原理如下：以 3 bit 乘法器 6 x 5 为例：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109174252669.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 接上图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109174359903.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></img></p>
+<p>因为 <strong>被乘数（multiplicand）</strong> 不断右移，其有效位逐渐变多。32 bit 的乘法，需要 64 bit 的存储器来存储被乘数。</p>
+<p>而 <strong>乘数（multiplier）</strong> 不断左移，有效位减少，故不需要额外的 bit 进行存储。</p>
+<h2><a id="_52"></a>优化乘法器</h2>
+<p>普通的 32 bit 乘法器需要 64 bit 的 ALU 和 64 bit 的存储器来存被乘数，这是比较浪费的。优化乘法器利用一些特性，对普通乘法进行优化。</p>
+<p>注意到普通乘法中，有两个移位：</p>
+<ol><li>被乘数（multiplicand）不断右移，每次移位，导致结果（product）有效位多 1 bit</li><li>乘数（multiplier）不断左移，每次移位，有效位少 1 bit</li></ol>
+<p>这意味着两者的有效位 <strong>此消彼长</strong> 🐸。</p>
+<p>可以通过一个 64 bit 的存储器，同时存储 <strong>结果（product）</strong> 和 <strong>乘数（multiplier）</strong>，这就是优化乘法器的思路。下面给出优化乘法器的结构：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109170223651.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 优化乘法器的工作流程如下：</img></p>
+<ol><li>判断最低位是否为 1</li><li>累加 / 不做处理（对应 1，0）</li><li>存储器整体右移</li><li>转 1，直到重复 n 次（n bit 的乘法就重复 n 次）</li></ol>
+<hr/>
+<p>下面的图表示 3 bit 乘法器 6 x 5 的工作流程：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109173829793.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 接上图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109173745689.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 注意每次累加都是累加在存储器的高 32 bit 上（就是存储器的左半边）</img></img></p>
+<p>此外，只需要使用一个 32 bit 的 ALU 和一个 64 bit 的存储器（存储 product 和 multiplier），节约资源。</p>
+<h2><a id="_83"></a>除法器</h2>
+<p>除法和乘法互为逆运算，这里我们不用竖式除法进行模拟。</p>
+<p>回想起二进制拆分的思想， <strong>被除数（dividend）</strong> 一定可以被 <strong>除数（divisor）</strong> 的二进制组合表达，比如：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"> 
+      
+       
+        
+         
+          
+           
+            
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              d 
+             
+            
+              e 
+             
+            
+              n 
+             
+            
+              d 
+             
+            
+              = 
+             
+            
+              30 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              s 
+             
+            
+              o 
+             
+            
+              r 
+             
+            
+              = 
+             
+            
+              5 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+            
+              30 
+             
+            
+              = 
+             
+             
+             
+               2 
+              
+             
+               2 
+              
+             
+            
+              ∗ 
+             
+            
+              5 
+             
+            
+              + 
+             
+             
+             
+               2 
+              
+             
+               1 
+              
+             
+            
+              ∗ 
+             
+            
+              5 
+             
+            
+           
+          
+         
+        
+       
+         \begin{array}{c} dividend=30 \\ divisor=5 \\ 30 =2^2*5+2^1*5 \end{array} 
+        
+       
+     </span><span class="katex-html"><span class="base"><span class="strut" style="height: 3.6em; vertical-align: -1.55em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width: 0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 2.05em;"><span class="" style="top: -4.21em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span><span class="mord mathdefault">e</span><span class="mord mathdefault">n</span><span class="mord mathdefault">d</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">3</span><span class="mord">0</span></span></span><span class="" style="top: -3.01em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">5</span></span></span><span class="" style="top: -1.81em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord">3</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">5</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">5</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 1.55em;"><span class=""></span></span></span></span></span><span class="arraycolsep" style="width: 0.5em;"></span></span></span></span></span></span></span></span></p>
+<p>于是我们直接枚举 <strong>除数（divisor）</strong> 的二进制表达，即：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"> 
+      
+       
+        
+         
+          
+           
+            
+             
+             
+               2 
+              
+             
+               0 
+              
+             
+            
+              ∗ 
+             
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              s 
+             
+            
+              o 
+             
+            
+              r 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+             
+             
+               2 
+              
+             
+               1 
+              
+             
+            
+              ∗ 
+             
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              s 
+             
+            
+              o 
+             
+            
+              r 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+             
+             
+               2 
+              
+             
+               2 
+              
+             
+            
+              ∗ 
+             
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              s 
+             
+            
+              o 
+             
+            
+              r 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+            
+              . 
+             
+            
+              . 
+             
+            
+              . 
+             
+            
+           
+          
+         
+         
+          
+           
+            
+             
+             
+               2 
+              
+             
+               n 
+              
+             
+            
+              ∗ 
+             
+            
+              d 
+             
+            
+              i 
+             
+            
+              v 
+             
+            
+              i 
+             
+            
+              s 
+             
+            
+              o 
+             
+            
+              r 
+             
+            
+           
+          
+         
+        
+       
+         \begin{array}{c} 2^0*divisor\\ 2^1*divisor\\ 2^2*divisor\\ ... \\ 2^n * divisor \end{array} 
+        
+       
+     </span><span class="katex-html"><span class="base"><span class="strut" style="height: 6em; vertical-align: -2.75em;"></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width: 0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 3.25em;"><span class="" style="top: -5.41em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span></span></span><span class="" style="top: -4.21em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span></span></span><span class="" style="top: -3.01em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span></span></span><span class="" style="top: -1.81em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span></span></span><span class="" style="top: -0.61em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.664392em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">s</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 2.75em;"><span class=""></span></span></span></span></span><span class="arraycolsep" style="width: 0.5em;"></span></span></span></span></span></span></span></span></p>
+<blockquote>
+<p>注：<br/> 在硬件中通过将 <strong>除数（divisor）</strong> 置于存储器的左半部分，然后不断右移实现枚举。</p>
+</blockquote>
+<p>然后判断 <strong>被除数（dividend）</strong> 是否大于 <strong>除数（divisor）</strong>，如果大于，那么减去除数，同时 <strong>商（quotient）</strong> 的末位添加 1，一直重复。</p>
+<p>下面给出除法器的硬件结构：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109201832768.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>那么除法器工作流程就很清晰了：</p>
+<ol><li>判断当前 <strong>被除数（dividend）</strong> 是否大于 <strong>除数（divisor）</strong></li><li>商末位置 1 / 不操作（对应 1 中 true / false）</li><li>被除数减去除数 / 不操作（对应 1 中 true / false）</li><li>除数右移</li><li>商左移</li><li>转 1，直到重复 n 次（除数是 n bit 的除法就重复 n 次）</li></ol>
+<p>最后被除数剩下的就是余数。</p>
+<hr/>
+<p>以 4bit 除以 2 bit 的 11 ÷ 2 为例：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109205330351.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 因为 divisor 是 从高 32 bit 逐渐移到低 32 bit，而且 dividend （可以）是 64 bit 的，所以需要 64 bit 的 ALU。</p>
+<h2><a id="_138"></a>优化除法器</h2>
+<p>优化后的除法器真正地模拟了小学数学的竖式除法。</p>
+<p>通过不断将 <strong>被除数（dividend）</strong> 的低位补齐，然后反复判断当其是否大于 <strong>除数（divisor）</strong>，来决定商的对应位为 1 或 0。</p>
+<img src="https://img-blog.csdnimg.cn/20210109213224195.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70" width="400px"/>
+<p>以 32 bit 的除法为例，通过一个 64 bit 的存储器，一开始将 <strong>被除数（dividend）</strong> 存于其低 32 bit，即右边，然后逐渐将这个存储器左移，我们取该存储器的高 32 bit 即可得到 <strong>被除数（dividend）</strong> 的二进制枚举：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109214647480.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>可以看到因为左移产生的无效位（最右边）逐渐增多，我们可以利用这些无效位，我们存储 <strong>商（quotient）</strong></p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109215158928.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>那么优化除法器的原理也很清晰了。首先我们将 <strong>被除数（dividend）</strong> 存于低 32 bit，然后将整个存储器左移一位，然后开始！</p>
+<ol><li>取存储器高 32 bit，记作 x，与 <strong>除数（divisor）</strong> 比大小</li><li>存储器高 32 bit 减去除数 / 不操作（对应 1 中的 大于 / 小于）</li><li>存储器整体左移</li><li>存储器最低位置 1 / 不操作（对应 1 中的 大于 / 小于）</li><li>转 1，直到循环 32 次，跳出时对<strong>左</strong>半部分（高 32 bit 进行一次右移）</li></ol>
+<hr/>
+<p>以 4 bit 的除法 11 ÷ 2 为例（注意这里大家都是 4 bit 了）：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109224622805.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 接上图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116154622708.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>注意最后一次其实是有左移的。事实上最后 <strong>跳出循环之后，要对左半部分用一次右移，抵消最后的左移</strong>，以获取正确的余数。</p>
+<p>优点是只用 32 bit 的 ALU 即可。</p>
+<blockquote>
+<p>注：<br/> 这里交换上文步骤 3，4 的顺序，最后可以免去特殊处理<br/> 但是 mips 这么做肯定有其原因，所以我们还是得蛋疼地记下来<br/> 此外，最吊的一点是，优化后的乘法器除法器，硬件可以用同一套！！！</p>
+<hr/> 只能死记硬背（？）顺序是：减法，左移，最低位置 1 
+</blockquote>
+<h2><a id="_185"></a>浮点加法器（重要⚠）</h2>
+<p>浮点加法分为如下几个步骤：</p>
+<ol><li>对阶：即将科学计数法的阶数对齐，把小阶调整到大阶</li><li>尾数相加：将调整后的尾数直接相加</li><li>规格化：包括将尾数调整为 1.xxx 的 IEEE 表示，溢出检查等操作</li><li>舍入</li></ol>
+<p>下面是富点加法的四个步骤的例子：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109233531839.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>有了思路， <s>易得</s> 硬件结构：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109234005673.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>是的，你可能会说：<s>“O你🐎！这么复杂学个疾疤学？”</s></p>
+<p>接下来一步一步进行分析。</p>
+<h3><a id="_203"></a>对阶阶段</h3>
+<p>对阶阶段分几个部分。</p>
+<p>首先从两个输入获取 <strong>阶码（exponent）</strong> 部分并且进行比较，将比较结果传递给 <strong>控制单元（control）</strong>，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109235934950.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>然后根据控制单元给出的信号（下图黄色箭头），对需要对齐的阶码进行调整（SHift right），随后将阶码传入 ALU，准备进行相加。注意我们根据控制信号，选择红蓝两个输入，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210109235824421.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_215"></a>加法阶段</h3>
+<p>该阶段将上一阶段传入的阶码进行相加，同时根据阶码比较的控制信号（下图橙色箭头），选择大的阶码作为结果数的阶码。如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110000903710.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_221"></a>规格化阶段</h3>
+<p>因为 IEEE 规则规定，尾数是这么表示的：</p>
+<img src="https://img-blog.csdnimg.cn/20200826233547611.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_80,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70#pic_center" width="300px"/>
+<br/>
+<p>规格化的浮点数，尾数范围在 1.0-2.0 之间，但是尾数相加的结果极有可能不在这个范围内，这时候我们就需要根据尾数，进行阶码的调整。</p>
+<p>首先，我们将 ALU 计算出来的尾数，传入控制单元：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110002255510.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>然后控制单元根据我们传入的尾数，计算转换为规格化的尾数，需要移位的位数，并且给出控制信号（下图黄色箭头），控制指数的加减和尾数的移位。如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110003312124.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_237"></a>舍入阶段</h3>
+<p>舍入阶段直接被安排为一个 “Rounding Hardware” 模块了，好耶！</p>
+<p>值得注意的是，<font color="red">舍入之后的结果，会和原本的规格化后的阶码，一起传入控制单元，以此判断舍入之后是否需要重新规格化</font>。如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110004103120.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>控制单元判断是否需要再次对舍入之后的结果进行规格化，同时给出控制信号（如下图黄色箭头），<font color="red">再次规格化舍入后的结果</font>。如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/2021011000455430.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_250"></a>浮点加法小结</h3>
+<p>牢记五步走：</p>
+<ol><li>对阶</li><li>加法</li><li>规格化</li><li>舍入</li><li>再次规格化</li></ol>
+<p>hhh 说是 4 步，其实最后规格化了两次。</p>
+<p><s>emmmm 我猜你肯定会想：“舍入后规格化，再舍入。好似是一个<strong>递归操作</strong>，如果死循环不就寄了？”。处理器的设计者这么厉害，我们想得到他会想不到？总之硬件肯定有办法判断这种情况的</s></p>
+<hr/>
+<p>好吧不说批话了。。。这可能是全网最详细的浮点加法解析了。。。如果你看书，那么，唔。。。书上更加简单 Orz 这里贴一个书上的原文：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110004923636.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-f23dff6052.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-c216769e99.css" rel="stylesheet"/>
+</div>
+<div id="treeSkill"></div>
+</article>
+<script>
+  $(function() {
+    setTimeout(function () {
+      var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+      if (mathcodeList.length > 0) {
+        for (let i = 0; i < mathcodeList.length; i++) {
+          if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+            var alt = mathcodeList[i].alt;
+            alt = '\\(' + alt + '\\)';
+            var curSpan = $('<span class="img-codecogs"></span>');
+            curSpan.text(alt);
+            $(mathcodeList[i]).before(curSpan);
+            $(mathcodeList[i]).remove();
+          }
+        }
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+      }
+    }, 1000)
+  });
+</script>
+</div></html>

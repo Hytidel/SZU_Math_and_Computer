@@ -1,0 +1,147 @@
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>.nodata  main {width:1000px;margin: auto;}</style></head><body class="nodata " style=""><div class="main_father clearfix d-flex justify-content-center " style="height:100%;"> <div class="container clearfix " id="mainBox"><main><div class="blog-content-box">
+<div class="article-header-box">
+<div class="article-header">
+<div class="article-title-box">
+<h1 class="title-article" id="articleContentId">计组复习（二）：单周期数据通路与控制信号</h1>
+</div>
+
+</div>
+</div>
+<div id="blogHuaweiyunAdvert"></div>
+<article class="baidu_pl">
+<div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-044f2cf1dc.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-light" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p></p>
+<div class="toc">
+<h4>目录</h4>
+<ul><li><a href="#_2" rel="nofollow">前言</a></li><li><a href="#_27" rel="nofollow">单周期数据通路</a></li><li><a href="#R__53" rel="nofollow">算数逻辑指令（R 型指令）</a></li><li><ul><li><a href="#_64" rel="nofollow">取指令阶段</a></li><li><a href="#_71" rel="nofollow">译码阶段</a></li><li><a href="#_81" rel="nofollow">执行阶段</a></li><li><a href="#_93" rel="nofollow">内存访问阶段</a></li><li><a href="#_103" rel="nofollow">写回阶段</a></li><li><a href="#_112" rel="nofollow">下一条指令</a></li></ul>
+</li><li><a href="#_130" rel="nofollow">内存访问指令</a></li><li><a href="#_159" rel="nofollow">分支跳转指令</a></li><li><a href="#_174" rel="nofollow">总结（重要⚠）</a></li></ul>
+</div>
+<p></p>
+<h2><a id="_2"></a>前言</h2>
+<p>昨天复（yu）习了：<a href="https://blog.csdn.net/weixin_44176696/article/details/112392759">计组复习（一）：乘法器，除法器与浮点加法器</a>，巩固了硬件事如何实现运算操作的。</p>
+<p>今天复习 cpu 数据通路，也是很复杂的图。一步一步来吧。</p>
+<img src="https://img-blog.csdnimg.cn/2021010720492188.png" width="300px">
+<hr/>
+<p>唔。。。。现在是凌晨 1:42，人快芜了，所以博客内容可能会出现一些纰漏 dbq 我爬 Orz</p>
+<p><s>才不是打了一天 lol 导致没时间复习。还有，有没有懂哥知道男刀这版本怎么玩？出暗爪还是幕刃还是渴血？征服者 or 电刑？</s></p>
+<hr/>
+<p>编辑下：我的我的 还真漏了。。。</p>
+<p>课本上的图有一个多路复用器 01 接口画反了，但是我所有图片都是按照课本的图描图画的，于是也反了，来不及改了，算了（摆烂</p>
+<p>就是 Jump 控制信号对应的复用器：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111014030538.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>Jump 为 1 时才使用 Jump 的跳转，否则使用 beq 或者 PC+4 作为下一条指令地址。</p>
+<h2><a id="_27"></a>单周期数据通路</h2>
+<p>单周期即一个指令的执行，不包括流水线并行，是一种简单（雾）的数据通路。由之前的学习知晓 mips 的指令也分为几个阶段：</p>
+<ol><li>取指令 IF</li><li>译码 ID</li><li>执行 EX</li><li>访问内存 MEM</li><li>写回 WB</li></ol>
+<p>硬件正是根据这几个步骤进行设计的，且看 cpu 如何实现。</p>
+<p>按照惯例先上图，尽管这个图非常吓人，但是待会我们一步一步来分析它。</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110153227952.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>单周期数据通路的硬件从左到右对应了 mips 的 5 个阶段：</p>
+<ul><li>最左边首先是<strong>地址内存</strong>，对应取指令与译码阶段（IF / ID）</li><li>随后是寄存器文件和 ALU，对应执行阶段（EX）</li><li>再右边是<strong>数据内存</strong>，对应内存访问阶段（MEM）</li><li>最后是写回（RW）。</li></ul>
+<p>同样的，数据按照从左到右的顺序进行通路遍历，<s>来啦来看就知道了↓</s></p>
+<p>这里以 R 型指令举例。</p>
+<h2><a id="R__53"></a>算数逻辑指令（R 型指令）</h2>
+<p>算数逻辑指令一般指 add，and 这些指令。他们都是 R 型指令</p>
+<blockquote>
+<p>注：<br/> R 型指令一般指有三个操作寄存器的指令：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/2021011022550571.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</blockquote>
+<p>这意味着我们需要从两个源寄存器（rs，rt）读取数据，同时将结果写回目的寄存器（rd）。接下来看各个阶段的数据通路：</p>
+<h3><a id="_64"></a>取指令阶段</h3>
+<p>首先是取指令阶段，将指令取给控制单元，同时 PC+=4，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110233039500.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>IF 阶段不需要任何的控制数据。</p>
+<h3><a id="_71"></a>译码阶段</h3>
+<p>然后是译码阶段，这里需要用到 RegDst 控制信号，<strong>以确定目的寄存器是哪个</strong>。因为 R 型指令和数据存取指令有着不同的目的寄存器：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110232420847.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>通过 RegDst 置 1 控制信号（下图黄色箭头）指挥多路复用器（mux），我们取 [15-11] 作为目的寄存器：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110232027695.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_81"></a>执行阶段</h3>
+<p>然后是执行（EX）阶段，首先从寄存器中读取两个操作数并且传入 ALU。</p>
+<p>此外，需要额外的控制信号（对应下图黄色箭头）来<strong>决定数据源是来自寄存器还是由指令给出的立即数给出</strong>。</p>
+<p>值得注意的是，<strong>ALUOp 控制信号告诉 ALU 要执行何种运算</strong>，因为不同指令需要做不同的运算，比如 add 就是按位相加，and 就是按位与运算。</p>
+<p>因为执行的是 R 型指令，这里 ALUSrc 置 0 来确保从寄存器中读取数据，而不是来自于立即数，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210110234415418.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_93"></a>内存访问阶段</h3>
+<p>再然后是内存访问阶段（MEM），因为 R 型指令都是算数逻辑指令，不涉及内存访问，通过两个控制信号：</p>
+<ol><li>MemRead，置 0，表示不需要从内存中读取数据</li><li>MemWrite，置 0，表示不需要将数据写入内存</li></ol>
+<p>通过两个控制信号，直接跳过这个阶段（对应下图红色箭头绕路）：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111000458409.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_103"></a>写回阶段</h3>
+<p>最后是写回阶段。这里需要两个控制信号：</p>
+<ol><li>MemtoReg，置 0，表示写回到寄存器的数据<strong>不是</strong>从内存中来</li><li>RegWrite，置 1，表示<strong>需要</strong>将结果写回寄存器</li></ol>
+<p>控制信号如下图黄色箭头所示：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111000220732.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_112"></a>下一条指令</h3>
+<p>最后需要完成指令的跳转，这里通过控制信号：</p>
+<ol><li>Branch，置 0，表示不需要进行分支跳转</li><li>Jump，置 0，表示这<strong>不是</strong>一条 j 指令，按照 beq 或者 PC+4 来跳转</li></ol>
+<blockquote>
+<p>注：图中 Jump 的复用器画反了。</p>
+</blockquote>
+<p>于是 PC+4 的值被写回 PC，完成下一条指令的跳转，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111001634842.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<blockquote>
+<p>注：<br/> 这不是 mips 流水线里面的一个阶段<br/> 这里单独写出来是因为不想把图画的太复杂，否则很难看清<br/> 事实上这应该发生在写回阶段，毕竟写 PC 也是一种写回（雾</p>
+</blockquote>
+<h2><a id="_130"></a>内存访问指令</h2>
+<p>和上面的 R 型指令的推导过程类似，这里我就不画分解图了 <s>dbp 我是懒狗我爬</s>，但是大体思路都是一致的。</p>
+<p>回想 mips 每一个阶段都需要 <s>赣神魔</s> 干什么，就能很快得出答案！</p>
+<hr/>
+<p>首先来看 lw 指令。lw 指令需要 4 个关键的控制信号置 1，他们分别是：</p>
+<ol><li>MemRead：置 1，需要读取内存</li><li>MemtoReg：置 1，需要将内存数据写回寄存器</li><li>RegWrite：置 1，需要写寄存器</li><li>ALUSrc：置 1，需要从指令立即数读取 ALU 运算数据</li></ol>
+<p>四个关键控制信号由黄色箭头标记，而红色箭头则表示了数据的流向，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111004310580.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<hr/>
+<p>再来看 sw 指令。sw 指令只需两个关键控制信号置 1 即可：</p>
+<ol><li>ALUSrc：置 1，表示从立即数读取操作数</li><li>MemWrite：置 1，表示要向内存中写数据</li></ol>
+<p>两个关键控制信号由黄色箭头标记，而红色箭头则表示了数据的流向，如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/2021011100553082.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_159"></a>分支跳转指令</h2>
+<p>分支跳转指令也需要两个关键控制信号，他们分别是：</p>
+<ol><li>Branch：置 1，表示需要执行分支跳转</li><li>Jump：置 0，表示这<strong>不是</strong>一条 j 指令，按照 beq 或者 PC+4 来跳转</li></ol>
+<blockquote>
+<p>注：图中 Jump 的复用器画反了。</p>
+</blockquote>
+<p>看图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111011106360.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 一步一步来看，就是：</p>
+<ul><li>首先根据立即数，计算分支指令跳转的目的地址（由上图蓝色箭头表示），此外注意地址计算乘以 4，因为一条指令占 4 字节</li><li>然后 ALU 会判断读取的两个寄存器（rs，rt）是否相等</li><li>如果相等，则给出一个控制信号（上图橙色箭头），并且和 Branch 控制信号进行<strong>与运算</strong>，决定最终是否执行分支</li><li>执行 beq / PC+4，写回 PC</li></ul>
+<h2><a id="_174"></a>总结（重要⚠）</h2>
+<p>在了解了几种指令的数据通路概要之后，老师给出的真值表似乎不那么棘手了：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111012207253.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<blockquote>
+<p>此外，附一张内鬼给的控制信号含义表：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116134422406.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 主要记忆两个：<br/> ALUSrc：为 0 表示第二个操作数来自寄存器 rt，为 1 表示来自立即数<br/> RegDst：为 0 表示目的寄存器是 rt，为 1 表示目的寄存器号为 rd</p>
+</blockquote>
+<p>此外，注意 ALUOp 是 2 bit 的控制信号，它告诉 ALU 该做什么运算，加 or 减：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111012416935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>控制信号真值表：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111012950754.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</img></div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-f23dff6052.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-c216769e99.css" rel="stylesheet"/>
+</div>
+<div id="treeSkill"></div>
+</article>
+<script>
+  $(function() {
+    setTimeout(function () {
+      var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+      if (mathcodeList.length > 0) {
+        for (let i = 0; i < mathcodeList.length; i++) {
+          if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+            var alt = mathcodeList[i].alt;
+            alt = '\\(' + alt + '\\)';
+            var curSpan = $('<span class="img-codecogs"></span>');
+            curSpan.text(alt);
+            $(mathcodeList[i]).before(curSpan);
+            $(mathcodeList[i]).remove();
+          }
+        }
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+      }
+    }, 1000)
+  });
+</script>
+</div></html>

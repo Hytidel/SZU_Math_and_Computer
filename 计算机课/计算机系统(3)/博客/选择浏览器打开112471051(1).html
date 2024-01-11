@@ -1,0 +1,170 @@
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>.nodata  main {width:1000px;margin: auto;}</style></head><body class="nodata " style=""><div class="main_father clearfix d-flex justify-content-center " style="height:100%;"> <div class="container clearfix " id="mainBox"><main><div class="blog-content-box">
+<div class="article-header-box">
+<div class="article-header">
+<div class="article-title-box">
+<h1 class="title-article" id="articleContentId">计组复习（三）：流水化的数据通路，流水线冒险检测与处理</h1>
+</div>
+
+</div>
+</div>
+<div id="blogHuaweiyunAdvert"></div>
+<article class="baidu_pl">
+<div class="article_content clearfix" id="article_content">
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-044f2cf1dc.css" rel="stylesheet"/>
+<div class="markdown_views prism-atom-one-light" id="content_views">
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<path d="M5,0 0,2.5 5,5z" id="raphael-marker-block" stroke-linecap="round" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+</svg>
+<p></p>
+<div class="toc">
+<h4>目录</h4>
+<ul><li><a href="#_2" rel="nofollow">前言</a></li><li><a href="#_17" rel="nofollow">流水线思想</a></li><li><ul><li><a href="#_33" rel="nofollow">加速比</a></li></ul>
+</li><li><a href="#_42" rel="nofollow">流水化的数据通路</a></li><li><ul><li><a href="#lw_62" rel="nofollow">lw指令的流水化数据通路</a></li></ul>
+</li><li><a href="#_84" rel="nofollow">控制信号的传递</a></li><li><a href="#_95" rel="nofollow">数据冒险</a></li><li><ul><li><a href="#_103" rel="nofollow">数据冒险的检测</a></li><li><ul><li><a href="#1_115" rel="nofollow">1类冒险检测</a></li><li><a href="#2_132" rel="nofollow">2类冒险检测</a></li></ul>
+</li><li><a href="#_150" rel="nofollow">完整的冒险判断</a></li></ul>
+</li><li><a href="#_160" rel="nofollow">双重冒险</a></li><li><a href="#__163" rel="nofollow">取数-使用 冒险</a></li><li><ul><li><a href="#_189" rel="nofollow">阻塞处理</a></li></ul>
+</li><li><a href="#_205" rel="nofollow">分支冒险</a></li><li><a href="#_219" rel="nofollow">中断异常</a></li></ul>
+</div>
+<p></p>
+<h2><a id="_2"></a>前言</h2>
+<p>昨天复（yu）习了单周期的 mips 流水线数据通路，知晓了硬件结构如何通过一系列的控制信号，完成不同指令的区别处理。</p>
+<p>然而单周期的数据通路是一种理想化的情况，因为整个指令执行的过程，占用了全部的硬件。事实上，为了效率，流水化的硬件结构在同一时刻最多被 5 个指令分享（对应 mips 的 5 个阶段），这就带来了数据一致性的问题。</p>
+<p>流水化的数据通路通过中间缓存的方式，避免了数据冲突，并且巧妙地将 5 个阶段的硬件使用，按照逻辑分隔，真正实现了流水化执行指令。</p>
+<hr/>
+<p>墙裂推荐先阅读：</p>
+<ul><li><a href="https://blog.csdn.net/weixin_44176696/article/details/109897762">计组实验3 mips冒险之流水线冒险</a></li><li><a href="https://blog.csdn.net/weixin_44176696/article/details/112428866">计组复习（二）：单周期数据通路与控制信号</a></li></ul>
+<img src="https://img-blog.csdnimg.cn/2021010720492188.png" width="300px">
+<h2><a id="_17"></a>流水线思想</h2>
+<p>从逻辑上将一条指令分为 5 个阶段，分别是：</p>
+<ol><li>取指令（IF）</li><li>译码（ID）</li><li>执行（EX）</li><li>内存访问（MEM）</li><li>写回（WB）</li></ol>
+<p>因为任何一条指令都需要 5 个步骤，于是从硬件层面可以划分出 5 个不同的阶段。</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111194443123.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 按照这种方式划分，只要某个部件完成了它的工作，马上就可以执行下一条指令的对应部分，这使得流水化得以实现，大大提高效率：</img></p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111194751748.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 注：用的是我 <a href="https://blog.csdn.net/weixin_44176696/article/details/109897762">之前博客</a> 的图，以洗衣服为例（懒得画新图了</img></p>
+<h3><a id="_33"></a>加速比</h3>
+<p>如上图，假设流水线各个级所花费的时间一致（假设都为 1 个时钟周期），并且没有什么冒险的情况（理想化），那么：</p>
+<ul><li>串行执行 n 条指令，需要 5n 个周期</li><li>流水化执行 n 条指令，需要 n+2 个周期（看上文的图就懂了为啥+2）</li><li>加速比为 5n÷(n+2)=5</li></ul>
+<p>如果每个指令花费的时间不等，并且指令序列不是无限长，那么加速比会进一步下降。（因为吞吐率减少，同时不能忽略+2）</p>
+<h2><a id="_42"></a>流水化的数据通路</h2>
+<p>流水化意味着每个部件独立，可是事与愿违。同一条指令，下一个阶段的部件总需要依赖上一个部件的结果。</p>
+<p>以 ID 和 EX 阶段为例，EX 阶段需要 ID 阶段给出的控制信号和寄存器数据，才能放进 ALU 中进行运算。</p>
+<p>举个例子：流水化执行指令1，2。目前执行到指令 1 的 EX 阶段了，需要指令 1 ID 阶段的数据。但是因为只有一套硬件，此时 ID 部件已经填充了指令 2 的数据，再进行存取就会出错：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111200051897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 聪明的 <s>莫菲特</s> mips 设计者，通过在每个不同阶段之间添加缓存，来保存前一条指令的运行结果（包括数据和控制信号），供下一个阶段的部件进行调用：</img></p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111200843582.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> 有 5 个阶段那么总共添加 4 个缓存即可完成所有数据和控制信号的 pass，他们分别是：</img></p>
+<ol><li>IF/ID 缓存</li><li>ID/EX 缓存</li><li>EX/MEM 缓存</li><li>MEM/WB 缓存</li></ol>
+<blockquote>
+<p>注<br/> 其实这些缓存都是寄存器</p>
+</blockquote>
+<h3><a id="lw_62"></a>lw指令的流水化数据通路</h3>
+<p>下面通过 lw 指令的流水化数据通路来进行理解。在以下的图中，<font color="red">红色表示写</font>，<font color="blue">蓝色表示读</font>。</p>
+<p>首先是 IF 阶段，因为是一条新的指令，不需要读取任何缓存。直接读取指令二进制码，同时计算 PC+4，将结果写入 IF/ID 缓存：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111203215919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>然后是 ID 阶段，从 IF/ID 缓存中，读取 IF 阶段的运行结果，并且给出 ID 阶段的运行结果，存入 ID/EX 缓存。这里读取指令给出的源目寄存器号，并且从寄存器中读取实际数据，别忘了传递 PC。如下图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111204612555.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>再然后是 EX 阶段，同样重复之前的操作（从上一个阶段的缓存读取数据，写运行结果到下一个阶段）。这里读取目标地址和立即数给出的偏移量，然后送入 EX/MEM 缓存，供下一个阶段读取内存使用：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111203844309.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"><br/> MEM 阶段，从 EX/MEM 缓存中读取 EX 阶段计算出的地址，然后访问内存，得出的数据写入 MEM/WB 缓存：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111205111844.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></img></p>
+<p>WB 阶段读取 MEM/WB 缓存中，lw 指令读取的目标数据（下图蓝色箭头），同时要从 MEM/WB 缓存中 <strong>读取 lw 的目标寄存器号</strong>（下图绿色箭头），再根据目标寄存器号，将数据写回到正确的目标寄存器。如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111205439713.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_84"></a>控制信号的传递</h2>
+<p>和数据一样，译码阶段产生的 9 bit 的控制信号，也需要向后传递！其中</p>
+<ul><li>ALUSrc，RegDst，ALUOp 在 EX 阶段被使用</li><li>MemRead，MemWrite，Branch 在 MEM 阶段被使用</li><li>MemtoReg，RegWrite 在 WB 阶段被使用</li></ul>
+<p>数据通路需要逐级递减地向后传递每一级必要的控制信号：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111210721433.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 下面的表格表示了这种分级控制信号的传递关系：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111211245481.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_95"></a>数据冒险</h2>
+<p>数据冒险指两个连续的指令 1，2 其中指令 2 依赖指令 1 的计算结果，那么必须等待指令 1 的 WB 阶段之后，才能从目标寄存器中读取正确的数据。</p>
+<blockquote>
+<p>这里引一下 <a href="https://blog.csdn.net/weixin_44176696/article/details/109897762">我之前的博客</a> 的内容（偷懒了：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111212909779.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</blockquote>
+<p>通过前推（forwarding）策略可以解决数据冒险，即在指令 1 的 EX 之后，马上将数据送给指令 2 的 EX 阶段，这样无需多余的等待就可以让指令 2 继续。</p>
+<h3><a id="_103"></a>数据冒险的检测</h3>
+<p>数据冒险分两种情况，即：</p>
+<ol><li>连续的两条指令之间发生数据冒险，称作 1 类数据冒险</li><li>隔了一条指令，仍然发生数据冒险，称作 2 类数据冒险</li></ol>
+<p>如图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111213923763.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>根据上面数据通路中缓存的思路，我们<strong>将指令的源目寄存器也顺势传递下去</strong>，这样能够检测数据冒险。</p>
+<h4><a id="1_115"></a>1类冒险检测</h4>
+<p>先来看 1 类冒险，即紧紧相邻的两条指令之间的数据冒险，假设有如下的代码：</p>
+<pre><code>指令1
+指令2
+</code></pre>
+<p>那么指令 2 的 EX 阶段执行<strong>之前</strong>，就需要指令 1 的 EX 阶段执行<strong>之后</strong>的结果。根据数据通路，可以知晓：</p>
+<ol><li>ID/EX 缓存中存储了<strong>指令 2 的源寄存器号</strong></li><li>EX/MEM 缓存存储了指令 1 的计算结果，以及<strong>指令 1 的目的寄存器号</strong></li></ol>
+<p>那么通过判断【ID/EX 缓存中的源寄存器号】和【EX/MEM 缓存中的目的寄存器号】是否相等，我们就能够检测 1 类型的数据冒险了！原理如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111235343223.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h4><a id="2_132"></a>2类冒险检测</h4>
+<p>同样的，2 类数据冒险也是相似的原理。两条间隔的指令之间发生数据冒险，那么代码有：</p>
+<pre><code>指令1
+指令2（无关指令）
+指令3
+</code></pre>
+<p>指令 3 的 EX 阶段同样需要指令 1 的 EX 执行之后的结果。那么通过数据通路可以看出：</p>
+<ol><li>指令 3 执行到 EX 阶段时，指令 1 已经完成 MEM，准备进入 WB 阶段，那么<strong>指令 1 的目的寄存器号，必定存在于 MEM/WB 缓存</strong></li><li>指令 3 执行到 EX 阶段，<strong>则 ID/EX 缓存中会携带指令 3 的源寄存器号</strong></li></ol>
+<p>于是我们可以通过判断 【ID/EX 缓存中的源寄存器号】和【MEM/WB 缓存中的目的寄存器号】是否相等，我们就能够检测 2 类型的数据冒险了！原理如下图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111234539364.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_150"></a>完整的冒险判断</h3>
+<p>上文提到的思路是判断读和写寄存器是否是同一个，是则发生冒险。事实上因为 R 型指令和 I 型指令都需要读取 2 个寄存器的数据：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210111235719249.png"/></p>
+<p>即 rs 和 rt 寄存器，那么每种冒险，需要有 2 个情况的判断，一共 4 种情况，即：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112000358630.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_160"></a>双重冒险</h2>
+<p>双重冒险就是同时满足 1 类和 2 类冒险，解决方案很简单，就是只有 1 类冒险（EX 时冒险）不发生，才执行 2 类冒险（MEM 时冒险）的前推，详细的解释如下：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112000929101.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="__163"></a>取数-使用 冒险</h2>
+<p>和数据冒险不同，”取数-使用“ 冒险是<strong>后一条指令的源操作数依赖于前一条指令从内存中读取的数据</strong>，例：</p>
+<pre><code>lw r2, 2(r3)
+add r1, r1, r2
+</code></pre>
+<p>这意味着前推不再发生在 EX 之后，相反，前推操作只能发生在取数指令的 MEM 阶段之后。而且<strong>再怎么前推，总要延迟一个周期</strong>：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112003343658.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 还是以：</p>
+<pre><code>lw r2, 2(r3)
+add r1, r1, r2
+</code></pre>
+<p>为例：因为无论如何都要延迟一个周期，我们不能等到 add 指令 EX 的时候才判断 “取数-使用“ 冒险，<font color="red">因为 IF 和 ID 部件已经做了没有延迟的错误操作（即顺序执行 add 之后的指令）</font></p>
+<p>相反，我们在 add 指令 ID 阶段就要开始检测是否存在 “取数-使用“ 冒险。同样通过判断</p>
+<ul><li>ID/EX 缓存中，lw 指令的 <strong>目的</strong> 寄存器号 rd</li><li>IF/ID 缓存中，add 指令的 <strong>源</strong> 寄存器号 rs / rt</li></ul>
+<p>是否相等，来判断是否发生 “取数-使用“ 冒险。如下图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112004449434.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h3><a id="_189"></a>阻塞处理</h3>
+<p>“取数-使用“ 冒险一定会延迟一个周期，我们通过阻塞流水线来实现，我们干三件事：</p>
+<ol><li>ID/EX 缓存中，控制信号全部置0，这样接下来的 EX，MEM，WB 都是空操作（nop）</li><li>PC，IF/ID 缓存维持不变</li></ol>
+<p>流水线阻塞+前推解决 “取数-使用“ 冒险，图例如下：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112005551727.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/><br/> 还是以：</p>
+<pre><code>lw r2, 2(r3)
+add r1, r1, r2
+</code></pre>
+<p>为例：在 IF 执行之后，将 IF/ID 缓存的数据（对应 add），和 ID/EX 缓存的数据（对应 lw）传入阻塞单元，随后阻塞单元判断是否发生 “取数-使用“ 冒险，并且将 PC 保持原样，以阻塞一个时钟周期，如下图：<br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210112005811107.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_205"></a>分支冒险</h2>
+<p>mips 分支预测恒不跳转，此外，分支指令一般是 beq，在 EX 阶段，ALU 计算两个操作数是否相等，并且给出控制信号。但是<strong>实际执行分支，还是在 MEM 阶段</strong>。</p>
+<blockquote>
+<p>至于为啥是 MEM 阶段，可以看我之前的博客：<a href="https://blog.csdn.net/weixin_44176696/article/details/112428866">计组复习（二）：单周期数据通路与控制信号</a><br/> <img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116141417636.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</blockquote>
+<p>这就需要撤销一些指令，如果分支跳转的指令距离 beq 足够远，那么我们最多撤销 3 条指令。因为 beq 处于 MEM 阶段，意味着后面的 IF，ID，EX 三个阶段都是下 3 条指令的，而且最多只能有 3 条指令！</p>
+<p>和阻塞一样，我们把控制信号全部置 0 就可以了。</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116141143963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<h2><a id="_219"></a>中断异常</h2>
+<p>内鬼说这里要考。但是我觉得应该没啥好注意的，主要是跳转后的中断服务程序地址为 8000 00180</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116140101341.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+<p>然后是流水线全图：</p>
+<p><img alt="在这里插入图片描述" src="https://img-blog.csdnimg.cn/20210116140140842.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70"/></p>
+</img></div>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-f23dff6052.css" rel="stylesheet"/>
+<link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-c216769e99.css" rel="stylesheet"/>
+</div>
+<div id="treeSkill"></div>
+</article>
+<script>
+  $(function() {
+    setTimeout(function () {
+      var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+      if (mathcodeList.length > 0) {
+        for (let i = 0; i < mathcodeList.length; i++) {
+          if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+            var alt = mathcodeList[i].alt;
+            alt = '\\(' + alt + '\\)';
+            var curSpan = $('<span class="img-codecogs"></span>');
+            curSpan.text(alt);
+            $(mathcodeList[i]).before(curSpan);
+            $(mathcodeList[i]).remove();
+          }
+        }
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+      }
+    }, 1000)
+  });
+</script>
+</div></html>
