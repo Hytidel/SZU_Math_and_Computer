@@ -1,0 +1,41 @@
+1. 例程 1
+./child
+两遍, 结果不同
+
+2. 父进程与子进程间的依赖关系 (例程 1 + 阻塞)
+./child_blocked &
+ps
+pstree -p 父进程 PID
+kill -kill 父进程 PID
+
+3. 孤儿进程
+./orphan &
+ps j
+等待 10 s
+ps j
+观察到孤儿进程被 PID = 1 的进程接管
+pstree -p 1
+
+4. 僵尸进程
+./zombie
+ps j
+等待 5 s
+ps j
+观察到出现僵尸进程, 僵尸进程不会被 PID = 1 的进程接管
+
+5. 例程 2
+./external
+
+6. fork() 两个子进程 (两子进程互为兄弟)
+./two
+两遍, 结果可能不同
+
+7. 二叉树
+./binary
+输入高度 2
+ps j
+pstree -p 父进程的 PID
+输入高度 3
+两次运行结果不同
+
+

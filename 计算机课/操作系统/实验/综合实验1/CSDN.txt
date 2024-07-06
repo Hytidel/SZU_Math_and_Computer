@@ -1,0 +1,31 @@
+Linux命令 - more命令
+https://blog.csdn.net/qq_45988641/article/details/116921273
+
+Linux 查看目录和文件(shell中常见的基本命令)
+https://blog.csdn.net/ligare/article/details/126892059
+
+Windows命令建立文件和文件夹？
+https://blog.csdn.net/smallmww/article/details/133937222
+
+介绍几种使用C/C++语言判断一个文件是否存在的方法
+https://blog.csdn.net/QLeelq/article/details/123360740
+
+Linux系统编程：简单实现ls -R 功能
+https://blog.csdn.net/qq_29542611/article/details/79825066
+
+【C++入门】文件流（fstream）介绍和使用
+https://blog.csdn.net/weixin_42031299/article/details/126690787
+
+C++文件输入输出（fstream）简介
+https://blog.csdn.net/weixin_72668830/article/details/131118223
+
+关于C++中如何判断文件、目录存在的若干方法
+https://blog.csdn.net/chinawangfei/article/details/42487839
+
+C++获取指定目录中的所有文件名
+https://blog.csdn.net/weixin_38141453/article/details/109544404
+
+linux中管道的概念,浅谈Linux管道
+https://blog.csdn.net/jasonhongcn/article/details/124892236
+
+
