@@ -1,0 +1,1 @@
+Get-ChildItem -Recurse -File | ForEach-Object {Write-Output $_.FullName $(Get-Content $_.FullName | Measure-Object).Count}
