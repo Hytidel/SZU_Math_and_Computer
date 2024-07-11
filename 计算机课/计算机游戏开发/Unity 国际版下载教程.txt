@@ -1,0 +1,17 @@
+Unity Hub 下载
+https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe
+
+Unity Editor 下载
+https://unity.com/releases/editor/qa/lts-releases
+
+教程
+https://aibofan.com/how-to-escape-from-the-unity-china-special-edition/
+
+步骤:
+1. 按教程, 为以 unity.com 或 unity3d.com 后缀的网址设置代理. 
+    在 clash 中, 点击 "配置" , 右键你的配置, 选择 "文本编辑" , 按照格式添加 rules . 
+2. 下载并安装 Unity Hub 、Unity Editor . 
+3. 到 unity.com 注册 Unity ID , 国际版的注册只需电子邮件(可使用国内的邮箱), 无需手机. 
+4. 挂梯子, 选择全局代理, 按教程打开 Unity Hub , 登录. 
+    需要按梯子的端口修改 launch.bat 中的端口号. 
+5. 按提示添加 License , 选择 Personal 即可. 

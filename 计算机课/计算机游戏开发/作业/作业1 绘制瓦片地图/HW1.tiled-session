@@ -1,0 +1,44 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "HW1.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "exportAsImage.useCurrentScale": true,
+    "fileStates": {
+        "E:/Grade-3.5/计算机游戏开发/实验/实验1 二维游戏场景绘制/MoveAndControl.tsx": {
+            "scaleInDock": 1
+        },
+        "HW1.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 383.6666666666667,
+                "y": 342.99999999999994
+            }
+        },
+        "MoveAndControl.tsx": {
+            "scaleInDock": 1
+        },
+        "tiles.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "E:/Grade-3.5/计算机游戏开发/作业/作业1 绘制瓦片地图/地图素材",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "HW1.tmx"
+    ],
+    "project": "HW1.tiled-project",
+    "recentFiles": [
+        "HW1.tmx",
+        "tiles.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.margin": 1,
+    "tileset.spacing": 1
+}
