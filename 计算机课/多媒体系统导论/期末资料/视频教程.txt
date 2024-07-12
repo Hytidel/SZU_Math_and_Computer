@@ -1,0 +1,39 @@
+色度二次采样
+https://www.bilibili.com/video/BV13z411B7U2/
+https://www.bilibili.com/video/BV1V34y1j7Ey/
+https://www.bilibili.com/video/BV17x4y1K7bd/
+https://www.bilibili.com/video/BV1ds411T7F4/
+
+PCM
+https://www.youtube.com/watch?v=HlGJ6xxbz8s
+
+预测编码
+https://www.youtube.com/watch?v=V2QlhVWRV7E
+
+DPCM
+https://www.youtube.com/watch?v=PFbm-jsTIpA
+https://www.youtube.com/watch?v=UTsZ0_Q4lzI
+
+DM
+https://www.youtube.com/watch?v=jJkvX3tmUaI
+
+LZW 压缩
+https://www.bilibili.com/video/BV1ds411W7sX/
+
+LZW 解压
+https://www.bilibili.com/video/BV1Zs411W7yP/
+
+算术编码
+https://www.bilibili.com/video/BV1Qk4y1D7Fh/
+
+【【中英双字】JPEG算法原理 jpeg图片是如何压缩的？】 https://www.bilibili.com/video/BV1TZ4y1S7iG/?share_source=copy_web&vd_source=7253bb756212dab1f3985d715df68231
+
+基于运动补偿的视频压缩
+https://www.bilibili.com/video/BV1RV4y137XG/
+
+编码器-解码器架构 & seq2seq
+https://www.bilibili.com/video/BV1c54y1E7YP
+https://www.bilibili.com/video/BV16g411L7FG/
+https://www.youtube.com/watch?v=zbdong_h-x4
+https://www.youtube.com/watch?v=zbdong_h-x4
+
