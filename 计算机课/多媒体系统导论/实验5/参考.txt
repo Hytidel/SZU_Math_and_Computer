@@ -1,0 +1,14 @@
+Image search engine using Python and PyTorch. Query similar images from database.
+https://www.youtube.com/watch?v=elwNCEVh_Ug
+
+Image-search-engine
+https://github.com/DatumLearning/Image-search-engine/blob/main/
+
+一个傻瓜式构建可视化 web的 Python 神器 -- streamlit 教程
+https://blog.csdn.net/weixin_36338224/article/details/122104631
+
+streamlit中文开发手册（详细版）
+https://blog.csdn.net/weixin_44458771/article/details/135495928
+
+Python 应用开发：Streamlit 布局篇（容器布局）
+https://blog.csdn.net/qq_31988139/article/details/139155149
