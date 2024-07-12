@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="tile 0" tilewidth="32" tileheight="32" spacing="2" margin="2">
+  <image source="MoveAndControl.png" width="640" height="400"/>
+ </tileset>
+ <layer name="back" width="64" height="64">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3Uvy5EQRTH8emodSgoBIlo1p+SQqNU8AQUXsB6ACRIqMgteAL/WjoezbnMZCfH3LtzZ2ZD5PtJfsnc2d2Zc7Iz1xgAAAAAAAAAAAAAAAAAAAAAAAD8d1eS698uAiM3UXi9E8lpw2d/8UyV7v9V8lZ4zVHK6X9fciA59Obq/m8ktypnhfdOpc9gTg1Hkr7k2JvT/3/ozLu5uYy9S8mt4Vw9u/5j7vp6wn6p75BJyZRkOrMGvb/ff88M+p+J+O12x71zLEk2JctqPrcGv/+xQNp0vXu9jt/XNgrUoPn9LwbSZtjde5A8qjyllfkl1H/s/b+T3Afmdf/zZtD7wpA167t3IbmMrCFXqP/Y+/8u+bDjZ8mLHbv+K9P+/1c2zor5Pnv+uk7uOXfW1POO+flequ//bMPedY2rduzX6Y9Tz/94REJ0TyFV5PqlsmcT6n+3IVsRSa3nE1UDu9kAQAAA
+  </data>
+ </layer>
+</map>
