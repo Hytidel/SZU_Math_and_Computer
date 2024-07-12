@@ -1,0 +1,16 @@
+Cocos2d-x 3D
+https://blog.csdn.net/canjiangmengyuan/category_2437127.html
+
+Cocos2d-x 3D模型渲染
+https://blog.csdn.net/wlk1229/article/details/83961865
+
+Cocos2d-x 渲染器Renderer与6种RenderCommand详解
+https://blog.csdn.net/wlk1229/article/details/83240464
+
+Cocos2d-x之3D
+https://bbs.huaweicloud.com/blogs/219034
+
+3D
+https://docs.cocos2d-x.org/cocos2d-x/v4/en/3d/advanced.html
+
+
