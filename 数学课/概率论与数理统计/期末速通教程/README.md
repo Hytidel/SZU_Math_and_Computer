@@ -2,6 +2,10 @@
 
 https://www.bilibili.com/video/BV1dh411A7zB/
 
+期末速通讲义下载:
+
+https://gf.bilibili.com/item/detail/1105967071
+
 ---
 
 日常学习资源: 
