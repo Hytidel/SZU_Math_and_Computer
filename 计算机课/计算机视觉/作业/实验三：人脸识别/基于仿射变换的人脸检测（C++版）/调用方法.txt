@@ -1,0 +1,40 @@
+
+void CFaceDetectFMTCNN::FaceDetectDemo()
+{
+	//CFaceDetectFMTCNN detector("model_FMTCNN");  //声明类对象的时候，直接调用初始化函数
+
+	
+	string name_list[1] = {
+		//"0381.jpg",
+		"0421.jpg",
+	};
+
+	//	MTCNN detector("./model_FMTCNN");//放在初始化函数里
+	/*float factor = 0.709f;
+	float threshold[3] = { 0.7f, 0.6f, 0.6f };
+	int minSize = 12;*/
+
+	//printf("minSize=%d\n", minSize);
+
+	for (int n = 0; n < 1; n++) //deal with the n-th image
+	{
+		cv::Mat image = cv::imread(name_list[n], 1);// read the n-th image
+
+		/*for (int i = 0; i < 10; i++)
+		{*/
+		double t = (double)cv::getTickCount();
+		vector<FaceInfo> faceInfo;
+		//下面进行人脸检测
+		DetectFace_FMTCNN(image,faceInfo);
+			
+		std::cout << name_list[n] << " time," << (double)(cv::getTickCount() - t) / cv::getTickFrequency() << "s" << std::endl;
+
+		//显示画图
+		DispFaceBoxLandMarks(image, faceInfo);
+
+		cv::imwrite("test.png", image);
+		cv::imshow("image", image);
+		cv::waitKey(0);
+		//}
+	}
+}
