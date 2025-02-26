@@ -1,0 +1,28 @@
+首先在工程中include以下头文件
+#include "ReadFileNamesInFold.h"
+using namespace std;
+
+该类负责读取某个文件夹下各种格式图片（需要在ReadFileNamesInFold.h中指定以及修改相应代码）
+所有图片的文件名和路径都存储到FileNameVector变量中
+然后参考以下代码使用该类中的FileNameVector变量
+
+	char folddir[1000]={"\0"};
+        sprintf(folddir,"%s","E:\\0.香港项目\\6.服装配饰分割识别项目\\subfold");//这里输入文件夹所在地址
+
+	//这里连续读取多张图像，然后一块处理
+	TCHAR szPath[512];
+	strcpy(szPath,folddir);
+	//搜索该文件夹下的所有文件，获取文件名及其路径
+	ReadFileObj.searchfile(szPath,ReadFileObj.FileNameVector);
+	
+	for(int i=0;i<ReadFileObj.FileNameVector.size();i++)
+	{
+		//Step 1:读入一张图像（或多张）
+		Mat image=imread(ReadFileObj.FileNameVector[i].FileDirectory);//printf("图像名字是：%s\n",ReadFileObj.FileNameVector[i].FileDirectory.c_str());
+		//准备对图像进行处理
+                //处理步骤。。。。
+		imshow("show",image_rescale);
+		cvWaitKey(0);
+	}
+	//释放链表
+	ReadFileObj.ReleaseVector(ReadFileObj.FileNameVector);
